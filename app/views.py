@@ -23,10 +23,28 @@ class home(APIView):
 
 
 
-class BookList(APIView):
+class PopularBookList(APIView):
     def get(self, request):
-        books = Book.objects.all()
+        books = Book.objects.order_by('-views')[:5]
         serializer = BookSerializer(books, many=True)
+        
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = BookSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class ShelfBookList(APIView):
+    def get(self, request):
+        books = Book.objects.order_by('publication_date')[:5]
+        serializer = BookSerializer(books, many=True)
+        
         return Response(serializer.data,status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -42,13 +60,28 @@ class BookList(APIView):
 class ExtractBookDetail(APIView):
     def get_object(self, pk):
         try:
-
             return ExtractedBook.objects.get(pk=pk)
         except ExtractedBook.DoesNotExist:
             raise Http404  # type: ignore
+        
+    def setView(self,pk):
+        try:
+            book_id=Book.objects.get(pk=pk)
+            book_id.views=int(book_id.views)+1
+
+            book_id.save()
+
+        
+            
+
+        except Book.DoesNotExist:
+            raise Http404  # type: ignore
+        
+
 
     def get(self, request, pk):
         book = self.get_object(pk)
+        self.setView(pk)
         serializer = ExtractedBookSerializer(book)
         headers = {'UID': book.uid}
         return Response(serializer.data,headers=headers)
