@@ -36,7 +36,16 @@ SECRET_KEY = "django-insecure-2afb%op2+35tb&)%5)tydw65ov0be^!_f4k&bvx$2dq^x3b@e)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.119','127.0.0.1','192.168.1.12','192.168.233.145']
+ALLOWED_HOSTS = ['192.168.0.119','127.0.0.1',"192.168.74.145","192.168.227.145",'notification-mostly-ni-federal.trycloudflare.com']
+
+
+#EMAIL SETTINGS
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Update as per your email provider
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'pdate73@gmail.com'
+EMAIL_HOST_PASSWORD = 'Pratik#123'
 
 
 # Application definition
@@ -52,8 +61,25 @@ INSTALLED_APPS = [
 
     #manualy
      'rest_framework',
+     'rest_framework.authtoken',
       "app"
 ]
+
+#Manualy
+REST_FRAMEWORK = {
+    
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    
+}
+
+
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
