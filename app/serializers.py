@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Book, Bookmark, ExtractedBook, Review, UserProfile
+from .models import Book, Bookmark, BookmarkID,  ExtractedBook, Review, UserProfile
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import authenticate, get_user_model
 
@@ -14,13 +14,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ['user', 'email', 'name', 'personal_info', 'image']
 
-
+class BookmarkIDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookmarkID
+        fields = ['uid','user','book']
 
 class BookmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bookmark
-        fields = ['id', 'user', 'book', "page",'created_at']
-
+        fields = ['uid',"bookmarkId","title",'description','page','created_at']
 
 
 
@@ -79,7 +81,7 @@ class LoginSerializer(serializers.Serializer):
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = ['uid', 'title', 'author','views', 'genre', 'publication_date', 'frontal_page', 'book_file']
+        fields = ['uid', 'title', 'author','views',"description", 'genre', 'publication_date', 'frontal_page', 'book_file','audiobook_file',"audiobook_duration"]
 
 class ExtractedBookSerializer(serializers.ModelSerializer):
     class Meta:

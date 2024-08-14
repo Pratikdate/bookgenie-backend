@@ -36,7 +36,7 @@ SECRET_KEY = "django-insecure-2afb%op2+35tb&)%5)tydw65ov0be^!_f4k&bvx$2dq^x3b@e)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.119','127.0.0.1',"192.168.74.145","192.168.227.145",'notification-mostly-ni-federal.trycloudflare.com']
+ALLOWED_HOSTS = ["192.168.244.145","192.168.227.145",'localhost','local-obtained-lamp-annoying.trycloudflare.com']
 
 
 #EMAIL SETTINGS
@@ -62,7 +62,9 @@ INSTALLED_APPS = [
     #manualy
      'rest_framework',
      'rest_framework.authtoken',
-      "app"
+     'djongo',
+      "app",
+      "chatapp"
 ]
 
 #Manualy
@@ -121,6 +123,7 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
 
 
 # Password validation
