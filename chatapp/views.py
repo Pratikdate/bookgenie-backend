@@ -102,13 +102,7 @@ class HandelChat:
         
 
         prompt_template = """
-        You are a knowledgeable assistant trained to answer questions based on the provided context. 
-        Answer the question as thoroughly as possible using the context provided. 
-        If the question is not covered by the context, provide a helpful and related response based on general knowledge or reasoning.
-
-        If the question is about your identity, respond with "My name is Mr. Chat.", 
-
-
+        
         
         Context:{context} 
         Question:{question}
