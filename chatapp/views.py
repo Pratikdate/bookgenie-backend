@@ -1,41 +1,33 @@
 from django.http import HttpResponse
 from django.shortcuts import render
-# chat_app/views.py
 import json
 import os
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-
 import google.generativeai as genai
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 from app.models import ExtractedBook
-from dotenv import load_dotenv # type: ignore
+from dotenv import load_dotenv
 from django.conf import settings
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-# Create your views here.
-
-
-
 
 # Ensure environment variables are loaded
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=GOOGLE_API_KEY)
 
-class ChatPDFView(APIView):
-    # permission_classes = [IsAuthenticated]
-    # parser_classes = (MultiPartParser, FormParser)
 
+# View for handling chat with PDF
+class ChatPDFView(APIView):
     def get(self, request, pk):
         try:
             handelChat = HandelChat()
@@ -48,35 +40,42 @@ class ChatPDFView(APIView):
             # Process the text and create the vector store
             text_chunks = handelChat.get_text_chunks(raw_text)
             handelChat.get_vector_store(text_chunks)
-            
-            return Response({"success": True, "message": "Vector store is created for this book"}, status=status.HTTP_200_OK)
-        
-        except Exception as e:
-            return Response({"success": False, "message": "Vector store is not created for this book", 'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def post(self, request, pk, *args, **kwargs):
+            return Response({"success": True, "message": "Vector store created for this book"}, status=status.HTTP_200_OK)
+
+        except ExtractedBook.DoesNotExist:
+            return Response({"success": False, "message": f"Book with id {pk} not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"success": False, "message": "Error creating vector store", 'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request, pk):
         try:
             handelChat = HandelChat()
             user_question = request.data.get('content')
+
+            if not user_question:
+                return Response({"success": False, "message": "No question provided"}, status=status.HTTP_400_BAD_REQUEST)
+
             response = handelChat.user_input(user_question)
-            
+
             if response:
                 return Response({"success": True, "content": response}, status=status.HTTP_200_OK)
             else:
-                return Response({"success": False, "content": "No response generated"}, status=status.HTTP_400_BAD_REQUEST)
-        
+                return Response({"success": False, "message": "No response generated"}, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
+# Sample Home View
 class Home(APIView):
     def get(self, request):
-        return HttpResponse("hello world")
-    
-
+        return HttpResponse("Hello world")
 
 class HandelChat:
+    def __init__(self, user_name=None):
+        self.user_name = user_name or "User"  # Personalize with user's name if available
+
     def get_pdf_text(self, path):
         text = ""
         try:
@@ -99,16 +98,12 @@ class HandelChat:
         vector_store.save_local("faiss_index")
 
     def get_conversational_chain(self):
-        
-
         prompt_template = """
+        Context: {context}
+        Question: {question}
         
-        Context:{context} 
-        Question:{question}
-
         Answer:
         """
-
         model = ChatGoogleGenerativeAI(
             model="gemini-pro", 
             client=genai,  
@@ -118,13 +113,42 @@ class HandelChat:
         chain = load_qa_chain(llm=model, chain_type="stuff", prompt=prompt)
         return chain
 
+    # New method to handle greetings
+    def handle_greetings(self, user_question):
+        greetings = {
+            "hi": f"Hello, {self.user_name}! How can I assist you today?",
+            "hello": f"Hi there, {self.user_name}! What can I do for you?",
+            "good morning": f"Good morning, {self.user_name}! How can I help you today?",
+            "good evening": f"Good evening, {self.user_name}! What would you like to ask?",
+            "what is your name": "I am BookBot, here to help you with your questions."
+        }
+        return greetings.get(user_question.lower(), None)
+
+    # New method to handle unknown answers
+    def handle_unknown_answer(self):
+        return (
+            f"Sorry, {self.user_name}, I couldn't find the answer to your question. "
+            "You might want to try rephrasing or asking about a specific topic in the book."
+        )
+
     def user_input(self, user_question):
         print(user_question)
+
+        # Handle personalized greetings
+        greeting_response = self.handle_greetings(user_question)
+        if greeting_response:
+            return greeting_response
+
         embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
         new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
-        docs = new_db.similarity_search(user_question,k=6)
-        
+        docs = new_db.similarity_search(user_question, k=6)
+
+        if not docs:
+            # No relevant documents, return fallback response
+            return self.handle_unknown_answer()
+
+        # Otherwise, generate a response using the conversational chain
         chain = self.get_conversational_chain()
-        response = chain({"input_documents":docs, "question": user_question}, return_only_outputs=True)
-        
-        return response.get("output_text", "No response generated")
+        response = chain({"input_documents": docs, "question": user_question}, return_only_outputs=True)
+
+        return response.get("output_text", self.handle_unknown_answer())  # Fallback if no answer is generated

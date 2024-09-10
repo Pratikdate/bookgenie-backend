@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Book, Bookmark, BookmarkID,  ExtractedBook, Review, UserProfile
+from .models import Book, Bookmark, BookmarkID,  ExtractedBook, Review, UserProfile, Binding
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import authenticate, get_user_model
 
@@ -92,3 +92,9 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ['uid', 'book', 'reviewer_name', 'rating', 'comment']
+
+class BindingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Binding
+        fields = ['uniqueBindingId', 'title', 'description', 'image', 'date', 'user']
+        read_only_fields = ['user']  # Make `user` read-only on input, if necessary

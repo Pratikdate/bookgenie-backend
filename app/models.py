@@ -13,6 +13,9 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
+
+
+
 class Book(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
     title = models.CharField(max_length=100, unique=True)
@@ -69,3 +72,16 @@ class Bookmark(models.Model):
 
     def __str__(self):
         return f'{self.bookmarkId} - {self.title}'
+
+
+
+class Binding(models.Model):
+    uniqueBindingId = models.CharField(max_length=100, unique=True)  # Unique Binding ID
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    image = models.ImageField(upload_to='bindings/')  # Ensure to configure media settings
+    date = models.DateField(auto_now_add=True)  # Automatically add the current date
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to User model
+
+    def __str__(self):
+        return self.title

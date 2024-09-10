@@ -1,6 +1,6 @@
 # chat_app/urls.py
 from django.urls import path
-from .views import BookmarkListView, BookmarkCreateView, UserProfileView, home,PopularBookList,ShelfBookList,ExtractBookDetail,RegisterView, LoginView, ForgotPasswordView,CheckAuthStatus,CustomAuthToken
+from .views import BindingDetailView, BindingListCreateView, BookmarkListView, BookmarkCreateView, UserProfileView, home,PopularBookList,ShelfBookList,ExtractBookDetail,RegisterView, LoginView, ForgotPasswordView,CheckAuthStatus,CustomAuthToken
 
 urlpatterns = [
     path("",home.as_view()),
@@ -14,4 +14,7 @@ urlpatterns = [
     path('popularbooks/<int:pk>', PopularBookList.as_view(), name='book-list'),
      path('shelfbooks/<int:pk>', ShelfBookList.as_view(), name='book-list'),
     path('extractBooks/<str:pk>/', ExtractBookDetail.as_view(), name='book-detail'),
+
+    path('bindings/', BindingListCreateView.as_view(), name='binding-list-create'),
+    path('bindings/<str:uniqueBindingId>/', BindingDetailView.as_view(), name='binding-detail'),
 ]

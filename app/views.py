@@ -7,9 +7,9 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from .models import Book, Bookmark, BookmarkID,  ExtractedBook, UserProfile
-from .serializers import BookSerializer, BookmarkIDSerializer, BookmarkSerializer, CustomAuthTokenSerializer, ExtractedBookSerializer, UserProfileSerializer
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from .models import Binding, Book, Bookmark, BookmarkID,  ExtractedBook, UserProfile
+from .serializers import BindingSerializer, BookSerializer, BookmarkIDSerializer, BookmarkSerializer, CustomAuthTokenSerializer, ExtractedBookSerializer, UserProfileSerializer
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.models import User
@@ -329,6 +329,62 @@ class ExtractBookDetail(APIView):
         book.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+
+class BindingListCreateView(APIView):
+    """
+    List all bindings or create a new binding.
+    """
+
+    def get(self, request):
+        # Retrieve all binding instances
+        bindings = Binding.objects.filter(user=request.user)
+        serializer = BindingSerializer(bindings, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        # Create a new binding instance
+        serializer = BindingSerializer(data=request.data)
+        if serializer.is_valid():
+            # Set the user from the request
+            serializer.validated_data['user'] = request.user
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BindingDetailView(APIView):
+    """
+    Retrieve, update or delete a binding by its uniqueBindingId.
+    """
+
+    def get_object(self, uniqueBindingId):
+        try:
+            # Ensure that the binding belongs to the requesting user
+            return Binding.objects.get(uniqueBindingId=uniqueBindingId, user=self.request.user)
+        except Binding.DoesNotExist:
+            raise Http404
+
+    def get(self, request, uniqueBindingId):
+        # Retrieve a specific binding instance
+        binding = self.get_object(uniqueBindingId)
+        serializer = BindingSerializer(binding)
+        return Response(serializer.data)
+
+    def put(self, request, uniqueBindingId):
+        # Update a specific binding instance
+        binding = self.get_object(uniqueBindingId)
+        serializer = BindingSerializer(binding, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, uniqueBindingId):
+        # Delete a specific binding instance
+        binding = self.get_object(uniqueBindingId)
+        binding.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 
