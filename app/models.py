@@ -1,4 +1,5 @@
 # chat_app/models.py
+from datetime import timezone
 import uuid
 from django.db import models
 from django.contrib.auth.models import User
@@ -17,11 +18,35 @@ class UserProfile(models.Model):
 
 
 class Book(models.Model):
+
+
+     
+    GENRE_CHOICES = [
+        ('romance', 'Romance'),
+        ('mystery', 'Mystery'),
+        ('science_fiction', 'Science Fiction'),
+        ('fantasy', 'Fantasy'),
+        ('non_fiction', 'Non-Fiction'),
+        ('biography', 'Biography'),
+        ('self_help', 'Self-Help'),
+        ('history', 'History'),
+        ('horror', 'Horror'),
+        ('adventure', 'Adventure'),
+        ('young_adult', 'Young Adult'),
+        ('children', 'Children’s Books'),
+        ('cookbooks', 'Cookbooks'),
+        ('travel', 'Travel'),
+        ('science_nature', 'Science & Nature'),
+        ('spiritual', 'Spiritual'),
+        ('investing', 'Investing'),
+        ('knowledge', 'Knowledge'),
+    ]
+
     uid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
     title = models.CharField(max_length=100, unique=True)
     author = models.CharField(max_length=100)
     description = models.CharField(max_length=10000, blank=True)
-    genre = models.CharField(max_length=50)
+    genre = models.CharField(max_length=50, choices=GENRE_CHOICES)
     views = models.IntegerField(default=0)
     star = models.IntegerField(default=0)
     publication_date = models.DateField()
@@ -74,14 +99,51 @@ class Bookmark(models.Model):
         return f'{self.bookmarkId} - {self.title}'
 
 
-
 class Binding(models.Model):
-    uniqueBindingId = models.CharField(max_length=100, unique=True)  # Unique Binding ID
+    uid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
     title = models.CharField(max_length=255)
+    book=models.ForeignKey(Book, on_delete=models.CASCADE,null=True,blank=True)
     description = models.TextField()
-    image = models.ImageField(upload_to='bindings/')  # Ensure to configure media settings
+    image = models.ImageField(upload_to='bindings/',blank=True)  # Ensure to configure media settings
     date = models.DateField(auto_now_add=True)  # Automatically add the current date
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to User model
 
     def __str__(self):
         return self.title
+
+
+class BindingItem(models.Model):
+    RESOURCE_TYPE_CHOICES = [
+        ('image', 'Image'),
+        ('youtubevideo', 'YouTube Video'),
+        ('notes', 'Notes'),
+        ('web', 'Web'),
+    ]
+
+    uid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True) # Automatically generated unique ID
+    item_position = models.PositiveIntegerField()  # Position number of the item
+    binding = models.ForeignKey(Binding, on_delete=models.CASCADE, related_name='items')  # Link to Binding model
+    resource_type = models.CharField(
+        max_length=100,
+        choices=RESOURCE_TYPE_CHOICES,
+        blank=True,
+        default='web'  # Set a default value if needed
+    )
+    resource_link = models.URLField(max_length=500)  # URL link to the resource
+
+    def __str__(self):
+        return f"Item {self.item_position} in {self.binding.title}"
+
+
+
+class VisitedActivity(models.Model):
+    uid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    visited_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-visited_at']  # Orders by most recent visits
+
+    def __str__(self):
+        return f'{self.book} visited at {self.visited_at}'

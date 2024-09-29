@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Book, Bookmark, BookmarkID,  ExtractedBook, Review, UserProfile, Binding
+from .models import BindingItem, Book, Bookmark, BookmarkID,  ExtractedBook, Review, UserProfile, Binding, VisitedActivity #VisitedActivity
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import authenticate, get_user_model
 
@@ -93,8 +93,34 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ['uid', 'book', 'reviewer_name', 'rating', 'comment']
 
+class BindingItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BindingItem
+        fields = ['uid', 'item_position', 'binding', 'resource_type','resource_link']
+
+
 class BindingSerializer(serializers.ModelSerializer):
+    items = BindingItemSerializer(many=True, read_only=True)  # Nested binding items
+
     class Meta:
         model = Binding
-        fields = ['uniqueBindingId', 'title', 'description', 'image', 'date', 'user']
-        read_only_fields = ['user']  # Make `user` read-only on input, if necessary
+        fields = ['uid', 'title','book', 'description', 'image', 'date', 'user', 'items']
+
+class VisitedActivitySerializer(serializers.ModelSerializer):
+    book = BookSerializer(read_only=True)  # Remove 'many=True' since it's a single object
+
+    book = serializers.PrimaryKeyRelatedField(queryset=Book.objects.all())  # Expect book ID as input
+
+
+    class Meta:
+        model = VisitedActivity
+        fields = ['uid', 'book', 'user', 'visited_at']
+        
+
+class GetVisitedActivitySerializer(serializers.ModelSerializer):
+    book = BookSerializer(read_only=True)  # This includes the complete book object
+
+    class Meta:
+        model = VisitedActivity
+        fields = ['uid', 'book', 'user', 'visited_at']
+        

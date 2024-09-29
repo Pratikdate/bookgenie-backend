@@ -36,7 +36,7 @@ SECRET_KEY = "django-insecure-2afb%op2+35tb&)%5)tydw65ov0be^!_f4k&bvx$2dq^x3b@e)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.244.145","192.168.227.145",'localhost','local-obtained-lamp-annoying.trycloudflare.com']
+ALLOWED_HOSTS = ["192.168.244.145","192.168.25.145",'localhost','local-obtained-lamp-annoying.trycloudflare.com']
 
 
 #EMAIL SETTINGS
@@ -46,7 +46,6 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'pdate73@gmail.com'
 EMAIL_HOST_PASSWORD = 'Pratik#123'
-
 
 # Application definition
 
@@ -64,7 +63,8 @@ INSTALLED_APPS = [
      'rest_framework.authtoken',
      'djongo',
       "app",
-      "chatapp"
+      "chatapp",
+      "socialapp"
 ]
 
 #Manualy
