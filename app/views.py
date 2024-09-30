@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from .models import Binding, BindingItem, Book, Bookmark, BookmarkID,  ExtractedBook, UserProfile, VisitedActivity
-from .serializers import BindingItemSerializer, BindingSerializer, BookSerializer, BookmarkIDSerializer, BookmarkSerializer, CustomAuthTokenSerializer, ExtractedBookSerializer, GetVisitedActivitySerializer, UserProfileSerializer, VisitedActivitySerializer #, VisitedActivitySerializer
+from .serializers import BindingItemSerializer, BindingSerializer, BookSerializer, BookmarkIDSerializer, BookmarkSerializer, CustomAuthTokenSerializer, ExtractedBookSerializer, GetVisitedActivitySerializer, LibrarySerializer, UserProfileSerializer, VisitedActivitySerializer #, VisitedActivitySerializer
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.models import User
@@ -28,6 +28,7 @@ from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
 from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework.exceptions import NotFound
+from django.contrib.auth import logout
 
 
 
@@ -202,6 +203,12 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class LogoutView (APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        logout(request)
+        return Response({'is_authenticated': False},status=status.HTTP_200_OK)
+    
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -603,6 +610,8 @@ class VisitedActivityList(APIView):
         try:
             # Fetch the Book instance by the book ID
             book = Book.objects.get(uid=book_id)
+            book.views+=1
+            book.save()
             
         except Book.DoesNotExist:
             return Response({"error": "Book not found."}, status=status.HTTP_400_BAD_REQUEST)
@@ -669,3 +678,19 @@ class VisitedActivityDetail(APIView):
         except Exception as e:
             # Handle any other exceptions and return a 500 Internal Server Error
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class  AddToLibrary(APIView):
+    def get(self, request, pk):
+        library_books = VisitedActivity.objects.filter(user=pk)
+        serializer = LibrarySerializer(library_books)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self,request):
+        book_id = request.data.get('book')
+        library_book=request.data
+        library_book["user"]=request.user
+        serializer = LibrarySerializer(library_book)
+        if serializer.is_valid():
+            serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)

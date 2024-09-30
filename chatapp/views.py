@@ -27,10 +27,10 @@ from rest_framework.permissions import IsAuthenticated
 #for summary
 
 
-from pdfminer.high_level import extract_text as extract_pdf_text
-from pytesseract import image_to_string  # For image OCR
+# from pdfminer.high_level import extract_text as extract_pdf_text
+# from pytesseract import image_to_string  # For image OCR
 from googleapiclient.discovery import build  # For YouTube video transcripts
-from docx import Document  # For Word document extraction
+# from docx import Document  # For Word document extraction
 from langchain.prompts import PromptTemplate
 from langchain.chains.question_answering import load_qa_chain
 from langchain.chains.summarize import load_summarize_chain

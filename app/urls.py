@@ -1,6 +1,6 @@
 # chat_app/urls.py
 from django.urls import path
-from .views import BindingAPIView, BindingDetailAPIView, BindingItemAPIView, BindingItemDetailAPIView, BindingListCreateView, BookBindingDetailAPIView, BookSearchAPIView, BookmarkIDView, BookmarkListView, BookmarkCreateView, UserProfileView, VisitedActivityDetail, VisitedActivityList, home,PopularBookList,ShelfBookList,ExtractBookDetail,RegisterView, LoginView, ForgotPasswordView,CheckAuthStatus,CustomAuthToken
+from .views import AddToLibrary, BindingAPIView, BindingDetailAPIView, BindingItemAPIView, BindingItemDetailAPIView, BindingListCreateView, BookBindingDetailAPIView, BookSearchAPIView, BookmarkIDView, BookmarkListView, BookmarkCreateView, UserProfileView, VisitedActivityDetail, VisitedActivityList, home,PopularBookList,ShelfBookList,ExtractBookDetail,RegisterView, LoginView, ForgotPasswordView,CheckAuthStatus,CustomAuthToken,LogoutView
 
 urlpatterns = [
 
@@ -9,6 +9,7 @@ urlpatterns = [
     path('check-auth-status/', CheckAuthStatus.as_view(), name='check_auth_status'),
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', CustomAuthToken.as_view(), name='login'),
+    path('logout/',LogoutView.as_view(), name='logout'),
 
 
     #Bookmarks Handling
@@ -38,4 +39,10 @@ urlpatterns = [
     path('binding-items/', BindingItemAPIView.as_view(), name='bindingitem-list'),
     path('binding-items/<str:pk>/', BindingItemDetailAPIView.as_view(), name='bindingitem-detail'),
     path('binding/<str:binding_id>/item/<str:item_id>/', BindingItemDetailAPIView.as_view(), name='bindingitem-detail'),
+
+
+    #library API's
+    path('library-books/', AddToLibrary.as_view(), name='library-books-details'),
+    path('library-books/<str:pk>/', AddToLibrary.as_view(), name='library-books'),
+
 ]
