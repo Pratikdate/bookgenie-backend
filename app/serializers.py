@@ -123,4 +123,10 @@ class GetVisitedActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = VisitedActivity
         fields = ['uid', 'book', 'user', 'visited_at']
-        
+
+class LibrarySerializer(serializers.ModelSerializer):
+    book = BookSerializer(read_only=True)
+    class Meta:
+        model = VisitedActivity
+        fields = ['uid', 'book', 'user', 'date_time']
+           

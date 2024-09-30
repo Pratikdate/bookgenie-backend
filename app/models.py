@@ -59,8 +59,8 @@ class Book(models.Model):
         return str(self.title + " : " + str(self.uid))
 
 class ExtractedBook(models.Model):
-    uid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    book = models.ForeignKey(Book, related_name='extracted_books', on_delete=models.CASCADE, primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+    book = models.ForeignKey(Book, related_name='extracted_books', on_delete=models.CASCADE)
     book_file = models.FileField(upload_to='extracted_books', null=True, blank=True)
 
     def __str__(self):
@@ -147,3 +147,13 @@ class VisitedActivity(models.Model):
 
     def __str__(self):
         return f'{self.book} visited at {self.visited_at}'
+
+
+
+class Library(models.Model):
+    uid=models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
+    book=models.ForeignKey(Book, on_delete=models.CASCADE,null=True,blank=True)
+    user=models.ForeignKey(User, on_delete=models.CASCADE,null=True,blank=True)
+    date_time=models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f'{self.book} add by {self.user}'
