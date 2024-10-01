@@ -28,7 +28,7 @@ class Book(models.Model):
         ('fantasy', 'Fantasy'),
         ('non_fiction', 'Non-Fiction'),
         ('biography', 'Biography'),
-        ('self_help', 'Self-Help'),
+        ('self-help', 'Self-Help'),
         ('history', 'History'),
         ('horror', 'Horror'),
         ('adventure', 'Adventure'),
@@ -59,8 +59,8 @@ class Book(models.Model):
         return str(self.title + " : " + str(self.uid))
 
 class ExtractedBook(models.Model):
-    uid = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
-    book = models.ForeignKey(Book, related_name='extracted_books', on_delete=models.CASCADE)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    book = models.ForeignKey(Book, related_name='extracted_books', on_delete=models.CASCADE,primary_key=True)
     book_file = models.FileField(upload_to='extracted_books', null=True, blank=True)
 
     def __str__(self):

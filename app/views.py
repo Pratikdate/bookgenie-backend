@@ -12,7 +12,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
-from .models import Binding, BindingItem, Book, Bookmark, BookmarkID,  ExtractedBook, UserProfile, VisitedActivity
+from .models import Binding, BindingItem, Book, Bookmark, BookmarkID,  ExtractedBook, Library, UserProfile, VisitedActivity
 from .serializers import BindingItemSerializer, BindingSerializer, BookSerializer, BookmarkIDSerializer, BookmarkSerializer, CustomAuthTokenSerializer, ExtractedBookSerializer, GetVisitedActivitySerializer, LibrarySerializer, UserProfileSerializer, VisitedActivitySerializer #, VisitedActivitySerializer
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate, get_user_model
@@ -680,17 +680,31 @@ class VisitedActivityDetail(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class  AddToLibrary(APIView):
-    def get(self, request, pk):
-        library_books = VisitedActivity.objects.filter(user=pk)
-        serializer = LibrarySerializer(library_books)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self,request):
-        book_id = request.data.get('book')
-        library_book=request.data
-        library_book["user"]=request.user
-        serializer = LibrarySerializer(library_book)
-        if serializer.is_valid():
-            serializer.save()
+
+class AddToLibrary(APIView):
+    def get(self, request, pk):
+        # Fetch library books associated with a specific user
+        library_books = Library.objects.filter(user=request.user.id)
+        # Use 'many=True' since multiple objects may be returned
+        serializer = LibrarySerializer(library_books, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+    def post(self, request):
+        # Make a copy of the request data since it's immutable
+        library_book_data = request.data.copy()
+        
+        # Assign the user ID to the user field in the library book data
+        library_book_data["user"] = request.user.id
+        
+        # Initialize the serializer with the request data
+        serializer = LibrarySerializer(data=library_book_data)
+        
+        # Check if the serializer data is valid
+        if serializer.is_valid():
+            serializer.save()  # Save the valid data
+            return Response(serializer.data, status=status.HTTP_201_CREATED)  # Return 201 for creation success
+        
+        # If serializer is invalid, return 400 with the errors
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

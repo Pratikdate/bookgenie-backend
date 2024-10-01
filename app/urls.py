@@ -43,6 +43,5 @@ urlpatterns = [
 
     #library API's
     path('library-books/', AddToLibrary.as_view(), name='library-books-details'),
-    path('library-books/<str:pk>/', AddToLibrary.as_view(), name='library-books'),
-
+   
 ]

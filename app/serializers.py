@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import BindingItem, Book, Bookmark, BookmarkID,  ExtractedBook, Review, UserProfile, Binding, VisitedActivity #VisitedActivity
+from .models import BindingItem, Book, Bookmark, BookmarkID,  ExtractedBook, Library, Review, UserProfile, Binding, VisitedActivity #VisitedActivity
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import authenticate, get_user_model
 
@@ -127,6 +127,6 @@ class GetVisitedActivitySerializer(serializers.ModelSerializer):
 class LibrarySerializer(serializers.ModelSerializer):
     book = BookSerializer(read_only=True)
     class Meta:
-        model = VisitedActivity
+        model = Library
         fields = ['uid', 'book', 'user', 'date_time']
            

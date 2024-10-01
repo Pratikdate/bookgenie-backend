@@ -36,7 +36,7 @@ SECRET_KEY = "django-insecure-2afb%op2+35tb&)%5)tydw65ov0be^!_f4k&bvx$2dq^x3b@e)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.244.145","192.168.25.145",'192.168.137.173','localhost','local-obtained-lamp-annoying.trycloudflare.com']
+ALLOWED_HOSTS = ["192.168.244.145","192.168.25.145",'192.168.3.151','localhost','local-obtained-lamp-annoying.trycloudflare.com']
 
 
 #EMAIL SETTINGS
