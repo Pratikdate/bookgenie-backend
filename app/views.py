@@ -145,7 +145,7 @@ class BookmarkListView(APIView):
             # Retrieve book details and add bookmarkuid
             book_data = Book.objects.filter(uid=data['book']).values(
                 'uid', 'title', 'author', 'views', 'genre', 
-                'publication_date', 'frontal_page', 'book_file', 'description'
+                'publication_date', 'frontal_page', 'book_file', 'description',"audiobook_file","audiobook_duration"
             ).first()
 
             if book_data:
