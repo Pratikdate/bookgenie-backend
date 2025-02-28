@@ -444,7 +444,7 @@ class HandelChat:
         # Load FAISS vector store and retrieve relevant documents
         print("[INFO] Loading FAISS vector store for document retrieval.")
         try:
-            embeddings = OllamaEmbeddings(model="qwen:0.5b")
+            embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
             new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
             docs = new_db.similarity_search(user_question, k=8)
             print(f"[SUCCESS] Retrieved {len(docs)} relevant documents.")
