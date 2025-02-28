@@ -365,7 +365,7 @@ class HandelChat:
         """Generates embeddings and stores them in a FAISS vector store."""
         print(f"[INFO] Creating FAISS vector store with {len(chunks)} chunks.")
         try:
-            embeddings = OllamaEmbeddings(model="qwen:0.5b")
+            embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
             vector_store = FAISS.from_texts(chunks, embedding=embeddings)
             vector_store.save_local("faiss_index")
             print("[SUCCESS] FAISS vector store created and saved locally.")
@@ -396,7 +396,11 @@ class HandelChat:
 
             """
 
-            model = Ollama(model="deepseek")
+            model = ChatGoogleGenerativeAI(
+                model="gemini-pro", 
+                client=genai,  
+                temperature=0.8,
+            )
             prompt = PromptTemplate(template=prompt_template, input_variables=[
                 "context", "question", "book_title", "book_author",
                 "book_description", "book_publish_at", "book_genre"
