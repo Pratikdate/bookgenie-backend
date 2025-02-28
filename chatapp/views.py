@@ -378,19 +378,22 @@ class HandelChat:
         print("[INFO] Setting up conversational chain using DeepSeek model.")
         try:
             prompt_template = """
-            Context:
-            - Book Title: {book_title}
-            - Author: {book_author}
-            - Description: {book_description}
-            - Published At: {book_publish_at}
-            - Genre: {book_genre}
+            You are an Mr.Chat an AI assistant specializing in books. Always prioritize answering based on the given book details. 
 
-            Relevant Documents:
-            {context}
+        Book Details:
+        - Title: {book_title}
+        - Author: {book_author}
+        - Description: {book_description}
+        - Published At: {book_publish_at}
+        - Genre: {book_genre}
 
-            Question: {question}
+        Context (Relevant Documents):
+        {context}
 
-            Provide a concise and accurate response based on the context. If no relevant answer is found, state that clearly.
+        Question: {question}
+
+        Answer accurately based on the book "{book_title}". If the provided context contains relevant information, use it to enhance your response. Do not provide generic or unrelated information. If the answer is not available in the book or context, state that clearly.
+
             """
 
             model = Ollama(model="deepseek")
